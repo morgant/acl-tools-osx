@@ -10,7 +10,7 @@ OVERVIEW
 USAGE
 -----
 
-The usage of `aclfind` is identical to `find` since it's really just a wrapper for it, with the addition of the following _primaries_. See `man find` for details.
+The usage of `aclfind` is identical to `find` since it's really just a wrapper for it, with the addition of the following _primaries_. See [`man find`](https://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/find.1.html) for details.
 
 ### Primaries
 
@@ -44,6 +44,7 @@ TO-DO
 
 	[x] Implement `-noacl`.
 	[x] Improve `-aceperm` to accept a comma-delimited list of permissions.
+	[ ] Add unit tests.
 	[ ] Build a proper `find` path to support operators.
 
 REFERENCE
