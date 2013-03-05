@@ -44,7 +44,8 @@ TO-DO
 
 	[x] Implement `-noacl`.
 	[x] Improve `-aceperm` to accept a comma-delimited list of permissions.
-	[x] Add `-aceallowuser`, `-acedenyuser`, `-aceallowgroup`, `-acedenygroup`, `-aceallowperm`, `-acedenyperm` primaries?
+	[ ] Add `-aceallowuser`, `-acedenyuser`, `-aceallowgroup`, `-acedenygroup`, `-aceallowperm`, `-acedenyperm` primaries?
+	[ ] Override `-exec` so we're performing it _after_ we get results back from `find` (it should never be passed through to `find`).
 	[ ] Add unit tests.
 	[ ] Build a proper `find` path to support operators.
 
