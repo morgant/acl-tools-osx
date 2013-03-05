@@ -1,0 +1,171 @@
+#!/bin/bash
+
+# 
+# aclfind
+# 
+# A Mac OS X-specific wrapper for `find` that specifically looks for files with
+# ACLS.
+# 
+# Loosely based on the concept from this hint:
+# <http://hints.macworld.com/article.php?story=20080816224959309>
+# 
+# v0.1   - 2013-03-05 Morgan Aldridge <morgant@makkintosshu.com>
+#                     Initial version.
+# 
+
+DEBUG=false
+
+acl_plan=()
+base_plan=()
+printacl=false
+noacl=false
+
+function in_array()
+{
+	local found=false
+	local value="$1"
+	shift
+	
+	if [ -z "$value" ]; then $found; fi
+	if [ ${#@} -lt 1 ]; then $found; fi
+	for array_value in "$@"; do
+		if [ "$value" = "$array_value" ]; then found=true; fi
+	done
+	
+	$found
+}
+
+function build_plan() {
+	while [ -n "$1" ]; do
+		case "$1" in
+			"-noacl")
+				noacl=true
+				;;
+			"-printacl")
+				printacl=true
+				;;
+			"-aceuser" | "-acegroup" | "-aceperm")
+				acl_plan+=("$1" "$2")
+				shift
+				;;
+			"-aceallow" | "-acedeny")
+				acl_plan+=("$1")
+				;;
+			*)
+				base_plan+=("$1")
+				;;
+		esac
+		shift
+	done;
+	
+	if $DEBUG; then
+		echo "BASE_PLAN: ${base_plan[@]}"
+		echo "ACL_PLAN: ${acl_plan[@]}"
+	fi
+}
+
+function match_ace() {
+	local matches=true
+	
+	# parse the ace
+	local type
+	local name
+	local grant
+	local permissionss=()
+	if [[ "$1" =~ ^(user|group):([A-Za-z0-9]+)\ (allow|deny)\ ([a-z_,]+)$ ]]; then
+		type="${BASH_REMATCH[1]}"
+		name="${BASH_REMATCH[2]}"
+		grant="${BASH_REMATCH[3]}"
+		IFS=, read -a permissions <<< "${BASH_REMATCH[4]}"
+	fi
+	
+	if $DEBUG; then echo "TYPE: ${type}; NAME: ${name}; GRANT: ${grant}; PERMISSIONS: ${permissions[@]}"; fi
+	
+	for ((i=0; i<${#acl_plan[@]}; i++)); do
+		case "${acl_plan[i]}" in
+			"-aceuser")
+				# is this ACE for a user (or unspecified)?
+				(( i++ ))
+				if [[ ( "$type" = "user" || -z "$type" ) && ( "$name" = ${acl_plan[i]} ) ]]; then
+					matches=true
+				else
+					matches=false
+				fi
+				(( i++ ))
+				;;
+			"-acegroup")
+				# is this ACE for a group (or unspecified)?
+				(( i++ ))
+				if [[ ( "$type" = "group" || -z "$type" ) && ( "$name" = ${acl_plan[i]} ) ]]; then
+					matches=true
+				else
+					matches=false
+				fi
+				;;
+			"-aceperm")
+				# does this ACE contain all the specified permissions?
+				(( i++ ))
+				if in_array "${acl_plan[i]}" "${permissions[@]}"; then
+					matches=true
+				else
+					matches=false
+				fi
+				(( i++ ))
+				;;
+			"-aceallow")
+				if [ "$grant" = "allow" ]; then
+					matches=true
+				else
+					matches=false
+				fi
+				;;
+			"-acedeny")
+				if [ "$grant" = "deny" ]; then
+					matches=true;
+				else
+					matches=false
+				fi
+				;;
+		esac
+	done
+	
+	$matches
+}
+
+function find() {
+	if $DEBUG; then
+		echo -n "find() ARGS: "
+		for arg in "$@"; do
+			echo "'$arg'"
+		done
+	fi
+	
+	# have find handle the non-ACL matches
+	local line
+	while read -r line; do
+		# for each filename that find matches, check to see if it has an ACL
+		local ls_line
+		while IFS= read -r ls_line; do
+			if [[ "$ls_line" =~ ^\ ([0-9]+):\ (.+)$ ]]; then
+				local num="${BASH_REMATCH[1]}"
+				local ace="${BASH_REMATCH[2]}"
+				# for each ACE, see if it matches the conditions specified
+				if match_ace "$ace"; then
+					echo "$line"
+					if $printacl; then
+						echo " ${num}: ${ace}"
+					fi
+				fi
+				(( ace_index++ ))
+			fi
+		done <<< "$(ls -alde "$line")"	## 2>/dev/null)"
+	done <<< "$(/usr/bin/find "$@")"	## 2>/dev/null)"
+}
+
+function main() {
+	build_plan "$@"
+	
+	find "${base_plan[@]}"
+}
+
+main "$@"
