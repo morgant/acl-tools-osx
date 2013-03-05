@@ -43,7 +43,7 @@ TO-DO
 -----
 
 	[x] Implement `-noacl`.
-	[ ] Improve `-aceperm` to accept a comma-delimited list of permissions, including the '*' wildcard.
+	[x] Improve `-aceperm` to accept a comma-delimited list of permissions.
 	[ ] Build a proper `find` path to support operators.
 
 REFERENCE

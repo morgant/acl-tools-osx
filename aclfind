@@ -105,11 +105,15 @@ function match_ace() {
 			"-aceperm")
 				# does this ACE contain all the specified permissions?
 				(( i++ ))
-				if in_array "${acl_plan[i]}" "${permissions[@]}"; then
-					matches=true
-				else
-					matches=false
-				fi
+				matches=false
+				local perms=()
+				IFS=, read -a perms <<< "${acl_plan[i]}"
+				if $DEBUG; then echo "PERMS: ${perms[@]}"; fi
+				for perm in "${perms[@]}"; do
+					if in_array "$perm" "${permissions[@]}"; then
+						matches=true
+					fi
+				done
 				(( i++ ))
 				;;
 			"-aceallow")
