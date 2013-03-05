@@ -18,13 +18,13 @@ The usage of `aclfind` is identical to `find` since it's really just a wrapper f
 	        True if the file has no ACL.
 	
 	-aceuser uname
-	        True file has an ACE for the user 'uname'.
+	        True if the file has an ACE for the user 'uname'.
 	
 	-acegroup gname
 	        True if the file has an ACE for the group 'gname'.
 	
 	-aceperm permission
-	        True if the file has an ACE containing 'permission'.
+	        True if the file has an ACE containing 'permission'. Accepts a comma-delimited list of permissions.
 	
 	-aceallow
 	        True if the file has an 'allow' ACE.
@@ -44,6 +44,7 @@ TO-DO
 
 	[x] Implement `-noacl`.
 	[x] Improve `-aceperm` to accept a comma-delimited list of permissions.
+	[x] Add `-aceallowuser`, `-acedenyuser`, `-aceallowgroup`, `-acedenygroup`, `-aceallowperm`, `-acedenyperm` primaries?
 	[ ] Add unit tests.
 	[ ] Build a proper `find` path to support operators.
 
