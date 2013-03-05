@@ -18,7 +18,7 @@ DEBUG=false
 acl_plan=()
 base_plan=()
 printacl=false
-noacl=false
+printnoacl=false
 
 function in_array()
 {
@@ -39,7 +39,7 @@ function build_plan() {
 	while [ -n "$1" ]; do
 		case "$1" in
 			"-noacl")
-				noacl=true
+				printnoacl=true
 				;;
 			"-printacl")
 				printacl=true
@@ -65,7 +65,7 @@ function build_plan() {
 }
 
 function match_ace() {
-	local matches=true
+	local matches=false
 	
 	# parse the ace
 	local type
@@ -145,20 +145,35 @@ function find() {
 	while read -r line; do
 		# for each filename that find matches, check to see if it has an ACL
 		local ls_line
+		local no_acl=true
+		local matching_acl=()
 		while IFS= read -r ls_line; do
 			if [[ "$ls_line" =~ ^\ ([0-9]+):\ (.+)$ ]]; then
+				no_acl=false
 				local num="${BASH_REMATCH[1]}"
 				local ace="${BASH_REMATCH[2]}"
 				# for each ACE, see if it matches the conditions specified
 				if match_ace "$ace"; then
-					echo "$line"
-					if $printacl; then
-						echo " ${num}: ${ace}"
-					fi
+					matching_acl+=("$ls_line")
 				fi
-				(( ace_index++ ))
 			fi
 		done <<< "$(ls -alde "$line")"	## 2>/dev/null)"
+		
+		# if there were matching ACEs, print the filename
+		if [ "${#matching_acl[@]}" -gt 0 ]; then
+			echo "$line"
+			
+			# are we supposed to be printing the matching ACEs?
+			if $printacl; then
+				for ace in "${matching_acl[@]}"; do
+					echo "$ace"
+				done
+			fi
+		# if the file has no ACL and we're supposed to print those filenames, do so
+		elif $no_acl && $printnoacl; then
+			echo "$line"
+		fi
+		
 	done <<< "$(/usr/bin/find "$@")"	## 2>/dev/null)"
 }
 

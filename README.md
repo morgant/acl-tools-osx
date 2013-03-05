@@ -42,7 +42,7 @@ The usage of `aclfind` is identical to `find` since it's really just a wrapper f
 TO-DO
 -----
 
-	[ ] Implement `-noacl`.
+	[x] Implement `-noacl`.
 	[ ] Improve `-aceperm` to accept a comma-delimited list of permissions, including the '*' wildcard.
 	[ ] Build a proper `find` path to support operators.
 
