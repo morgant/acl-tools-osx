@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# 
+# chgrpacl -R oldgrp newgrp file
+# 
+# Update ACLs on files/directories to change ACEs from one group name to
+# another. Only changes ACEs for the old group name, it doesn't create new ACEs.
+# 
+# Requires 'aclfind'.
+# 
+# v0.1   - 2013-03-05 - Morgan Aldridge <morgant@makkintosshu.com>
+#                       Initial version.
+# 
+
+function main () {
+	# do we have 'findacl'
+	if ! which findacl 1>/dev/null; then
+		echo "$0 requires findacl!" 1>&2
+		exit 1
+	fi
+	
+	# are we recursive?
+	local depth="-depth 0"
+	if [ "$1" = "-R" ]; then
+		depth=""
+		shift
+	fi
+	
+	# were we given enough parameters?
+	if [ $# -ne 3 ]; then
+		echo "An invalid number of parameters was specified!" 1>&2
+		exit 1
+	fi
+	local old_group="$1"
+	local new_group="$2"
+	local path="$3"
+	
+	# get all the filenames & their ACLs for file that have ACEs for the specified old group name
+	local line
+	local file
+	while IFS= read -r line; do
+		# parse the ACEs or filename
+		if [[ "$line" =~ ^\ ([0-9]+):\ (user|group):([A-Za-z0-9]+)\ (allow|deny)\ ([a-z_,]+)$ ]]; then
+			local num="${BASH_REMATCH[1]}"
+			local type="${BASH_REMATCH[2]}"
+			local name="${BASH_REMATCH[3]}"
+			local grant="${BASH_REMATCH[4]}"
+			local permissions="${BASH_REMATCH[5]}"
+			
+			#echo "#: $num; TYPE: $type; NAME: $name; GRANT: $grant; PERMISSIONS: $permissions"
+			
+			# rewrite the ACL with the new group name
+			if chmod =a# ${num} "${type}:${new_group} ${grant} ${permissions}" "$file"; then
+				echo " ${num}: ${type}:${old_group} ${grant} ${permissions}  -->  ${num}: ${type}:${new_group} ${grant} ${permissions}"
+			else
+				echo " ERROR! Unable to change ACE '${num}: ${type}:${old_group} ${grant} ${permissions}'!" 1>&2
+			fi
+		elif [[ "$line" =~ ^[^\ ] ]]; then
+			file="$line"
+			echo "$file"
+		fi
+	done <<< "$(findacl "$path" $depth -acegroup "$old_group" -printacl)"
+}
+
+main "$@"

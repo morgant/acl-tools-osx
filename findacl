@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 
-# aclfind
+# findacl
 # 
 # A Mac OS X-specific wrapper for `find` that specifically looks for files with
 # ACLS.
@@ -9,8 +9,8 @@
 # Loosely based on the concept from this hint:
 # <http://hints.macworld.com/article.php?story=20080816224959309>
 # 
-# v0.1   - 2013-03-05 Morgan Aldridge <morgant@makkintosshu.com>
-#                     Initial version.
+# v0.1   - 2013-03-05 - Morgan Aldridge <morgant@makkintosshu.com>
+#                       Initial version.
 # 
 
 DEBUG=false

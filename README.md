@@ -1,18 +1,28 @@
-aclfind
-=======
+ACL Tools for Mac OS X
+======================
 by Morgan Aldridge <morgant@makkintosshu.com>
 
 OVERVIEW
 --------
 
+This is a collection of command line tools for working with file ACLs to complement the support built into `ls` & `chmod` on Mac OS X, incl.:
+
+* `findacl` -- A wrapper for `find` which adds ACL-related primaries.
+* `chgrpacl` -- Change ACEs from one group to another.
+* `chusracl` -- Change ACEs from one user to another.
+
+Development was sponsored by [Small Dog Electronics, Inc.](http://www.smalldog.com/)
+
+FINDACL
+-------
+
 `aclfind` is a Mac OS X-specific wrapper to `find` that adds knowledge of ACLs. In Mac OS X, only `ls`, `chmod`, and `vim` command line utilities know about ACLs, and the latter only enough to preserve them. `find` is an extremely powerful tool, esp. for finding and adding/changing/removing permissions, but it's not helpful at all when it comes to ACLs, so this utility aims to improve that. It is written in `bash`, so it's slow, but I may port it to C at some point (or patch `find` itself?)
 
-USAGE
------
+### USAGE
 
 The usage of `aclfind` is identical to `find` since it's really just a wrapper for it, with the addition of the following _primaries_. See [`man find`](https://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/find.1.html) for details.
 
-### Primaries
+#### Primaries
 
 	-noacl
 	        True if the file has no ACL.
@@ -35,12 +45,11 @@ The usage of `aclfind` is identical to `find` since it's really just a wrapper f
 	-printace
 	        This prints any matching ACE after the filename, indented by a single space and prepended with the ACE number in the ACL (the same format that `ls` outputs ACEs in).
 	
-### Operators
+#### Operators
 
 **Note:** `aclfind` does not add any operators, but it also doesn't support operators at the moment and just ANDs them together. This is planned for a future release.
 
-TO-DO
------
+### TO-DO
 
 	[x] Implement `-noacl`.
 	[x] Improve `-aceperm` to accept a comma-delimited list of permissions.
