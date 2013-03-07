@@ -59,11 +59,37 @@ The usage of `aclfind` is identical to `find` since it's really just a wrapper f
 
 	[x] Implement `-noacl`.
 	[x] Improve `-aceperm` to accept a comma-delimited list of permissions.
-	[ ] Support inherited ACEs.
+	[x] Support inherited ACEs.
 	[ ] Add `-aceallowuser`, `-acedenyuser`, `-aceallowgroup`, `-acedenygroup`, `-aceallowperm`, `-acedenyperm` primaries?
 	[ ] Override `-exec` so we're performing it _after_ we get results back from `find` (it should never be passed through to `find`).
 	[ ] Add unit tests.
 	[ ] Build a proper `find` path to support operators.
+
+CHGRPACL
+--------
+
+`chgrpacl` is wrapper for `findacl` which allows you to change ACEs on files & directories from one group to another, much like `chgrp` lets you change the group for POSIX permissions. This is ideal if you need to replace group ACEs in a complex structure, for example you've had to create a new group in order to change the group's short name.
+
+#### USAGE
+
+The usage of `chgrpacl` is very similar to `chgrp` with the exception that you must provide the old group name as well as the new group name:
+
+	chgrpacl [-R] oldgroup newgroup file
+
+By default, `chgrpacl` will only change the ACEs for the specified `oldgroup` for the specified `file`, but one can use the `-R` option to change them recursively for all children as well.
+
+CHUSRACL
+--------
+
+`chusracl` is also a wrapper for `findacl` which allows you to change ACEs on files & directories from one user to another, much like `chown` lets you change the owner for POSIX permissions. This is ideal if you need to replace group ACEs in a complex structure, for example you have one user taking on the role (and therefore the permissions of) another user.
+
+#### USAGE
+
+The usage of `chusracl` is very similar to `chown` with the exception that you must provide the old user name as well as the new user name:
+
+	chusracl [-R] olduser newuser file
+
+By default, `chusracl` will only change the ACEs for the specified `olduser` for the specified `file`, but one can use the `-R` option to change them recursively for all children as well.
 
 REFERENCE
 ---------
