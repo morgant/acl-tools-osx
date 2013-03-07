@@ -48,7 +48,7 @@ function build_plan() {
 				acl_plan+=("$1" "$2")
 				shift
 				;;
-			"-aceallow" | "-acedeny")
+			"-acelocal" | "-aceinherited" | "-aceallow" | "-acedeny")
 				acl_plan+=("$1")
 				;;
 			*)
@@ -81,7 +81,7 @@ function match_ace() {
 		IFS=, read -a permissions <<< "${BASH_REMATCH[7]}"
 	fi
 	
-	if $DEBUG; then echo "TYPE: ${type}; NAME: ${name}; GRANT: ${grant}; PERMISSIONS: ${permissions[@]}"; fi
+	if $DEBUG; then echo "TYPE: ${type}; NAME: ${name}; INHERITED: ${inherited}; GRANT: ${grant}; PERMISSIONS: ${permissions[@]}"; fi
 	
 	for ((i=0; i<${#acl_plan[@]}; i++)); do
 		case "${acl_plan[i]}" in

@@ -40,20 +40,32 @@ function main () {
 	local file
 	while IFS= read -r line; do
 		# parse the ACEs or filename
-		if [[ "$line" =~ ^\ ([0-9]+):\ (user|group):([A-Za-z0-9]+)\ (allow|deny)\ ([a-z_,]+)$ ]]; then
+		if [[ "$line" =~ ^\ ([0-9]+):\ ((user|group):)?([A-Za-z0-9._-]+)\ ((local|inherited)\ )?(allow|deny)\ ([a-z_,]+)$ ]]; then
 			local num="${BASH_REMATCH[1]}"
-			local type="${BASH_REMATCH[2]}"
-			local name="${BASH_REMATCH[3]}"
-			local grant="${BASH_REMATCH[4]}"
-			local permissions="${BASH_REMATCH[5]}"
+			local type="${BASH_REMATCH[3]}"
+			local name="${BASH_REMATCH[4]}"
+			local inherited="${BASH_REMATCH[6]}"
+			local grant="${BASH_REMATCH[7]}"
+			local permissions="${BASH_REMATCH[8]}"
 			
 			#echo "#: $num; TYPE: $type; NAME: $name; GRANT: $grant; PERMISSIONS: $permissions"
 			
 			# rewrite the ACL with the new user name
-			if chmod =a# ${num} "${type}:${new_user} ${grant} ${permissions}" "$file"; then
-				echo " ${num}: ${type}:${old_user} ${grant} ${permissions}  -->  ${num}: ${type}:${new_user} ${grant} ${permissions}"
+			local tmp_old_user="$old_user"
+			local tmp_new_user="$new_user"
+			if [ -n "$type" ]; then
+				tmp_old_user="${type}:${tmp_old_user}"
+				tmp_new_user="${type}:${tmp_new_user}"
+			fi
+			if [ "$inherited" = "inherited" ]; then
+				chmod =ai# ${num} "${tmp_new_user} ${grant} ${permissions}" "$file"
 			else
-				echo " ERROR! Unable to change ACE '${num}: ${type}:${old_user} ${grant} ${permissions}'!" 1>&2
+				chmod =a# ${num} "${tmp_new_user} ${grant} ${permissions}" "$file"
+			fi
+			if [ $? -eq 0 ]; then
+				echo " ${num}: ${tmp_old_user} ${inherited}${grant} ${permissions}  -->  ${num}: ${tmp_new_user} ${inherited}${grant} ${permissions}"
+			else
+				echo " ERROR! Unable to change ACE '${num}: ${tmp_old_user} ${inherited}${grant} ${permissions}'!" 1>&2
 			fi
 		elif [[ "$line" =~ ^[^\ ] ]]; then
 			file="$line"
