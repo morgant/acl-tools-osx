@@ -36,6 +36,12 @@ The usage of `aclfind` is identical to `find` since it's really just a wrapper f
 	-aceperm permission
 	        True if the file has an ACE containing 'permission'. Accepts a comma-delimited list of permissions.
 	
+	-acelocal
+	        True if the file has a 'local', non-inherited, ACE.
+	
+	-aceinherited
+	        True if the file has an 'inherited' ACE.
+	
 	-aceallow
 	        True if the file has an 'allow' ACE.
 	
@@ -53,6 +59,7 @@ The usage of `aclfind` is identical to `find` since it's really just a wrapper f
 
 	[x] Implement `-noacl`.
 	[x] Improve `-aceperm` to accept a comma-delimited list of permissions.
+	[ ] Support inherited ACEs.
 	[ ] Add `-aceallowuser`, `-acedenyuser`, `-aceallowgroup`, `-acedenygroup`, `-aceallowperm`, `-acedenyperm` primaries?
 	[ ] Override `-exec` so we're performing it _after_ we get results back from `find` (it should never be passed through to `find`).
 	[ ] Add unit tests.

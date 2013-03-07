@@ -70,13 +70,15 @@ function match_ace() {
 	# parse the ace
 	local type
 	local name
+	local inherited
 	local grant
 	local permissionss=()
-	if [[ "$1" =~ ^(user|group):([A-Za-z0-9]+)\ (allow|deny)\ ([a-z_,]+)$ ]]; then
-		type="${BASH_REMATCH[1]}"
-		name="${BASH_REMATCH[2]}"
-		grant="${BASH_REMATCH[3]}"
-		IFS=, read -a permissions <<< "${BASH_REMATCH[4]}"
+	if [[ "$1" =~ ^((user|group):)?([A-Za-z0-9._-]+)\ ((local|inherited)\ )?(allow|deny)\ ([a-z_,]+)$ ]]; then
+		type="${BASH_REMATCH[2]}"
+		name="${BASH_REMATCH[3]}"
+		inherited="${BASH_REMATCH[5]}"
+		grant="${BASH_REMATCH[6]}"
+		IFS=, read -a permissions <<< "${BASH_REMATCH[7]}"
 	fi
 	
 	if $DEBUG; then echo "TYPE: ${type}; NAME: ${name}; GRANT: ${grant}; PERMISSIONS: ${permissions[@]}"; fi
@@ -115,6 +117,20 @@ function match_ace() {
 					fi
 				done
 				(( i++ ))
+				;;
+			"-acelocal")
+				if [[ "$inherited" = "local" || -z "$inherited" ]]; then
+					matches=true;
+				else
+					matches=false
+				fi
+				;;
+			"-aceinherited")
+				if [ "$inherited" = "inherited" ]; then
+					matches=true;
+				else
+					matches=false
+				fi
 				;;
 			"-aceallow")
 				if [ "$grant" = "allow" ]; then
