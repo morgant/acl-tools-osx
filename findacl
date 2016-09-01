@@ -4,16 +4,19 @@
 # findacl
 # 
 # A Mac OS X-specific wrapper for `find` that specifically looks for files with
-# ACLS.
+# ACLs.
 # 
 # Loosely based on the concept from this hint:
 # <http://hints.macworld.com/article.php?story=20080816224959309>
 # 
 # v0.1   - 2013-03-05 - Morgan Aldridge <morgant@makkintosshu.com>
 #                       Initial version.
+# v0.1.1 - 2016-09-01 - Morgan Aldridge
+#                       Improved matching of special characters in user & group
+#                       names in ACEs, incl spaces.
 # 
 
-DEBUG=false
+DEBUG=true
 
 acl_plan=()
 base_plan=()
@@ -73,7 +76,7 @@ function match_ace() {
 	local inherited
 	local grant
 	local permissionss=()
-	if [[ "$1" =~ ^((user|group):)?([A-Za-z0-9._-]+)\ ((local|inherited)\ )?(allow|deny)\ ([a-z_,]+)$ ]]; then
+	if [[ "$1" =~ ^((user|group):)?([A-Za-z0-9._\\ -]+)\ ((local|inherited)\ )?(allow|deny)\ ([a-z_,]+)$ ]]; then
 		type="${BASH_REMATCH[2]}"
 		name="${BASH_REMATCH[3]}"
 		inherited="${BASH_REMATCH[5]}"
@@ -88,7 +91,7 @@ function match_ace() {
 			"-aceuser")
 				# is this ACE for a user (or unspecified)?
 				(( i++ ))
-				if [[ ( "$type" = "user" || -z "$type" ) && ( "$name" = ${acl_plan[i]} ) ]]; then
+				if [[ ( "$type" = "user" || -z "$type" ) && ( "$name" = "${acl_plan[i]}" ) ]]; then
 					matches=true
 				else
 					matches=false
@@ -98,7 +101,7 @@ function match_ace() {
 			"-acegroup")
 				# is this ACE for a group (or unspecified)?
 				(( i++ ))
-				if [[ ( "$type" = "group" || -z "$type" ) && ( "$name" = ${acl_plan[i]} ) ]]; then
+				if [[ ( "$type" = "group" || -z "$type" ) && ( "$name" = "${acl_plan[i]}" ) ]]; then
 					matches=true
 				else
 					matches=false
