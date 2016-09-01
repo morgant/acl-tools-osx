@@ -48,7 +48,7 @@ The usage of `aclfind` is identical to `find` since it's really just a wrapper f
 	-acedeny
 	        True if the file has a 'deny' ACE.
 	
-	-printace
+	-printacl
 	        This prints any matching ACE after the filename, indented by a single space and prepended with the ACE number in the ACL (the same format that `ls` outputs ACEs in).
 	
 #### Operators
