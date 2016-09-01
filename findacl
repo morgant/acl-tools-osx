@@ -16,7 +16,7 @@
 #                       names in ACEs, incl spaces.
 # 
 
-DEBUG=true
+DEBUG=false
 
 acl_plan=()
 base_plan=()
